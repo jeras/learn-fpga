@@ -66,7 +66,11 @@ jobs:
 
     - name: '⚙️ Run verification framework'
       working-directory: FemtoRV/RISCOF
-      run: riscof run --config=config-quark.ini --suite=riscv-arch-test-3.10.0/riscv-test-suite/ --env=riscv-arch-test-3.10.0/riscv-test-suite/env
+      run: |
+        riscof run --config=config-quark.ini         --suite=riscv-arch-test-3.10.0/riscv-test-suite/ --env=riscv-arch-test-3.10.0/riscv-test-suite/env
+        riscof run --config=config-quark_bicycle.ini --suite=riscv-arch-test-3.10.0/riscv-test-suite/ --env=riscv-arch-test-3.10.0/riscv-test-suite/env
+        riscof run --config=config-tachyon.ini       --suite=riscv-arch-test-3.10.0/riscv-test-suite/ --env=riscv-arch-test-3.10.0/riscv-test-suite/env
+        riscof run --config=config-electron.ini      --suite=riscv-arch-test-3.10.0/riscv-test-suite/ --env=riscv-arch-test-3.10.0/riscv-test-suite/env
 
     - name: '📤 Archive test report'
       uses: actions/upload-artifact@v5

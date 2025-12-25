@@ -10,7 +10,7 @@ VERILATOR_COVERAGE?=verilator_coverage
 ################################################################################
 
 # Verilog/SystemVerilog RTL
-RTL+=../RTL/PROCESSOR/femtorv32_quark.v
+RTL+=../RTL/PROCESSOR/femtorv32_${DUT}.v
 
 # SystemVerilog bench (Test SV)
 TSV+=riscof_tb.sv
