@@ -88,6 +88,36 @@ class FemtoRV(pluginTemplate):
         self.objdump_exe = f'riscv{self.xlen}-unknown-elf-objdump'
         self.symbols_exe = f'riscv{self.xlen}-unknown-elf-nm'
 
+        # Simulation define macros.
+        simulate_defines_dict = {}
+        if self.debug:
+            simulate_defines_dict.update({'TRACE_SPIKE': None})
+
+        # Convert define macro dictionary into CLI
+        # TODO: properly handle define macros without value
+        if   self.simulator == 'questa':
+            simulate_defines = ' '.join([f'-defineall {key}={val}' for key, val in simulate_defines_dict.items()])
+        elif self.simulator == 'verilator':
+            simulate_defines = ' '.join([f'-D{key}={val}'          for key, val in simulate_defines_dict.items()])
+        elif self.simulator == 'vivado':
+            simulate_defines = ' '.join([f'-d {key}={val}'         for key, val in simulate_defines_dict.items()])
+
+        variables = f'DUT={self.dut} HDL_DEFINES="{simulate_defines}"'
+
+        # Makefile configuration
+        variables += ' TRACE=1'
+
+        if   self.simulator == 'questa':
+            simulate_cmd = f'{variables} make -C {os.path.join(self.work_dir, "../")} -f Makefile.questa compile'
+        elif self.simulator == 'verilator':
+            simulate_cmd = f'{variables} make -C {os.path.join(self.work_dir, "../")} -f Makefile.verilator compile'
+        elif self.simulator == 'vivado':
+            simulate_cmd = f'{variables} make -C {os.path.join(self.work_dir, "../")} -f Makefile.vivado compile'
+        else:
+            # TODO: __model__ ?
+            print("No simulator selected for '{__model__}'.")
+            raise SystemExit(1)
+
     def runTests(self, testList):
 
         # TUDO: figure out why there is an extra character in the name.
@@ -162,20 +192,6 @@ class FemtoRV(pluginTemplate):
             # get symbol list from elf file
             symbols_cmd = self.symbols_exe + f' {elf} > {sym}'
 
-            # Simulation define macros.
-            simulate_defines_dict = {}
-            if self.debug:
-                simulate_defines_dict.update({'TRACE_SPIKE': None})
-
-            # Convert define macro dictionary into CLI
-            # TODO: properly handle define macros without value
-            if   self.simulator == 'questa':
-                simulate_defines = ' '.join([f'-defineall {key}={val}' for key, val in simulate_defines_dict.items()])
-            elif self.simulator == 'verilator':
-                simulate_defines = ' '.join([f'-D{key}={val}'          for key, val in simulate_defines_dict.items()])
-            elif self.simulator == 'vivado':
-                simulate_defines = ' '.join([f'-d {key}={val}'         for key, val in simulate_defines_dict.items()])
-
             # Construct Verilog plusargs dictionary containing file paths.
             simulate_plusargs_dict = {
                 'TEST_DIR': test_dir+'/'
@@ -203,14 +219,13 @@ class FemtoRV(pluginTemplate):
                 # test-bench produced by a simulator (like verilator, vcs, incisive, etc).
                 # In case of an iss or emulator, this variable could point to where the iss binary is located.
                 # If PATH variable is missing in the config.ini we can hardcode the alternate here.
-                variables = f'DUT={self.dut} HDL_DEFINES="{simulate_defines}" HDL_PLUSARGS="{simulate_plusargs}"'
-                variables += ' TRACE=1'
+                variables = f' HDL_PLUSARGS="{simulate_plusargs}"'
                 if   self.simulator == 'questa':
-                    simulate_cmd = f'{variables} make -C {os.path.join(self.work_dir, "../")} -f Makefile.questa'
+                    simulate_cmd = f'{variables} make -C {os.path.join(self.work_dir, "../")} -f Makefile.questa simulate'
                 elif self.simulator == 'verilator':
-                    simulate_cmd = f'{variables} make -C {os.path.join(self.work_dir, "../")} -f Makefile.verilator'
+                    simulate_cmd = f'{variables} make -C {os.path.join(self.work_dir, "../")} -f Makefile.verilator simulate'
                 elif self.simulator == 'vivado':
-                    simulate_cmd = f'{variables} make -C {os.path.join(self.work_dir, "../")} -f Makefile.vivado'
+                    simulate_cmd = f'{variables} make -C {os.path.join(self.work_dir, "../")} -f Makefile.vivado simulate'
                 else:
                     # TODO: __model__ ?
                     print("No simulator selected for '{__model__}'.")

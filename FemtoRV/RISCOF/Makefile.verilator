@@ -92,7 +92,7 @@ compile: ${HDL}
 	echo "==== compile ===="
 	${VERILATOR} ${VFLAGS} ${MCR} ${PAR} --top ${TOP} ${HDL}
 
-sim: compile
+simulate:
 	echo "==== run ===="
 	obj_dir/V${TOP} ${ARG}
 #	${VERILATOR_COVERAGE} --annotate logs/annotated logs/coverage.dat
