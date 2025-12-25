@@ -1,7 +1,6 @@
 # Python virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
-pip3 install jsoncomment
 
 # GCC for RISC-V
 # versions with bug (producing C instructions for -march=rv32i)

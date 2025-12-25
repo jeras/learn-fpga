@@ -6,7 +6,6 @@ import shlex
 import logging
 import random
 import string
-from string import Template
 
 import riscof.utils as utils
 import riscof.constants as constants

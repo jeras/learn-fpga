@@ -6,9 +6,6 @@ import shlex
 import logging
 import random
 import string
-import json
-from jsoncomment import JsonComment
-from string import Template
 
 import riscof.utils as utils
 import riscof.constants as constants
