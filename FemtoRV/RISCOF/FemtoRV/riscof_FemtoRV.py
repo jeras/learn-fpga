@@ -118,6 +118,8 @@ class FemtoRV(pluginTemplate):
             print("No simulator selected for '{__model__}'.")
             raise SystemExit(1)
 
+        os.system(simulate_cmd)
+
     def runTests(self, testList):
 
         # TUDO: figure out why there is an extra character in the name.
