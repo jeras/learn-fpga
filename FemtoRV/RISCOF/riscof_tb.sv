@@ -79,7 +79,9 @@ module riscof_tb #(
             if (mem_wmask[i]) memory_array[mem_addr+i] <= mem_wdata[i];
         end
         // read access
-        if (mem_rstrb) begin
+        // TODO: always reading, no power saving
+//        if (mem_rstrb) begin
+        if (1'b1) begin
             for (int unsigned i=0; i<XLEN/8; i++) begin
                 mem_rdata[i] <= memory_array[mem_addr+i];
             end
@@ -96,7 +98,9 @@ module riscof_tb #(
             // write access
             mem_wbusy <= 1'b0;
             // read access
-            mem_rbusy <= ~mem_rstrb;
+            // TODO: always reading, no power saving
+            //mem_rbusy <= ~mem_rstrb;
+            mem_rbusy <= 1'b0;
         end
     end
 
@@ -134,7 +138,7 @@ module riscof_tb #(
         if (fd == 0) return 0;
         for (int unsigned addr=mem_begin; addr<mem_end; addr+=XLEN/8) begin
             for (int unsigned i=0; i<XLEN/8; i++) begin
-                $fwrite(fd, "%02h", memory_array[addr+i]);
+                $fwrite(fd, "%02h", memory_array[addr+XLEN/8-1-i]);
             end
             $fwrite(fd, "\n");
 
@@ -152,32 +156,46 @@ module riscof_tb #(
 
     /* verilator lint_off INITIALDLY */
     initial
-    begin
+    begin: main
         string firmware, signature;
         logic htif_halt = 1'b0;
+        int unsigned cnt = 0;
+
         // get/display test directory from plusargs
-        assert ($value$plusargs("test_dir=%s"       , test_dir       ))  $display("RISCOF: test_dir = \'%s\'", test_dir);  else  $fatal(0, "RISCOF: test_dir $plusarg not found!");
+        assert ($value$plusargs("TEST_DIR=%s"       , test_dir       ))  $display("RISCOF: test_dir = \'%s\'", test_dir);  else  $fatal(0, "RISCOF: test_dir $plusarg not found!");
         // get/display ELF symbols from plusargs
         assert ($value$plusargs("begin_signature=%h", begin_signature))  $display("HTIF: begin_signature = 0x%08h", begin_signature);  else  $fatal(0, "HTIF: begin_signature $plusarg not found!");
         assert ($value$plusargs("end_signature=%h"  , end_signature  ))  $display("HTIF: end_signature   = 0x%08h", end_signature  );  else  $fatal(0, "HTIF: end_signature   $plusarg not found!");
         assert ($value$plusargs("tohost=%h"         , tohost         ))  $display("HTIF: tohost          = 0x%08h", tohost         );  else  $fatal(0, "HTIF: tohost          $plusarg not found!");
         assert ($value$plusargs("fromhost=%h"       , fromhost       ))  $display("HTIF: fromhost        = 0x%08h", fromhost       );  else  $fatal(0, "HTIF: fromhost        $plusarg not found!");
+
+        // waveforms
+        // TODO
+        $dumpfile({test_dir, "dut.fst"});
+        $dumpvars(0);
+
         // load binary file into memory
-        firmware = {test_dir, "DUT.bin"};
+        firmware = {test_dir, "dut.bin"};
         $display("Loading file into memory: %s", firmware);
         assert (memory_init_bin(firmware) > 0) begin
             $display("RISCOF: loaded firmware file \'%s\' into memory.", firmware);
         end else begin
             $fatal  ("RISCOF: firmware file \'%s\' not found.", firmware);
         end
+
         // RESET sequence
         repeat (4) @(posedge clk);
         rst <= 1'b0;
+
         // wait for HTIF halt request
-        signature = {test_dir, "signature.hex"};
+        signature = {test_dir, "DUT-FemtoRV.signature"};
         do begin
             @(posedge clk);
-            if (&mem_wmask && (mem_addr == 32'h0000_0010)) begin
+            // increment counter and check for timeout
+            cnt <= cnt+1;
+            htif_halt <= (cnt > 40_000);
+            // check write into HTIF tohost
+            if (&mem_wmask && (mem_addr == tohost + 32'h0000_0000)) begin
                 htif_halt <= mem_wdata[0][0];
             end
             if (htif_halt) begin
@@ -191,11 +209,11 @@ module riscof_tb #(
         // wait a few clock cycles before finishing simulation
         repeat(4) @(posedge clk);
         $finish;
-    end
+    end: main
     /* verilator lint_on INITIALDLY */
 
     ////////////////////////////////////////////////////////////////////////////////
-    // Verbose execution trace
+    // verbose execution trace
     ////////////////////////////////////////////////////////////////////////////////
 
 endmodule: riscof_tb

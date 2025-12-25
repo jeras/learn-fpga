@@ -63,9 +63,7 @@ VFLAGS += --trace-structs
 
 # set VERILATOR macro (used to handle tool quirks)
 #MCR += -DVERILATOR
-ifdef TRACE
-MCR += -DTRACE_DEBUG
-endif
+MCR += ${HDL_DEFINES}
 
 ################################################################################
 # Verilog toplevel parameter override
@@ -79,7 +77,7 @@ endif
 # Verilog $plusargs runtime arguments
 ################################################################################
 
-ARG += +test_dir="${FILE_MEM}" +="${FILE_SIG}"
+ARG += ${HDL_PLUSARGS}
 
 ################################################################################
 #
@@ -91,8 +89,10 @@ lint: ${HDL}
 	${VERILATOR} --lint-only ${HDL} --top ${TOP}
 
 compile: ${HDL}
+	echo "==== compile ===="
 	${VERILATOR} ${VFLAGS} ${MCR} ${PAR} --top ${TOP} ${HDL}
 
 sim: compile
+	echo "==== run ===="
 	obj_dir/V${TOP} ${ARG}
 #	${VERILATOR_COVERAGE} --annotate logs/annotated logs/coverage.dat
