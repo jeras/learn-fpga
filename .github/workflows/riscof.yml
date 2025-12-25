@@ -18,11 +18,11 @@ jobs:
         fetch-depth: 0
         submodules: recursive
 
-#    - name: '📦 Install Python'
-#      uses: actions/setup-python@v6
-#      with:
-#        python-version: '3.11'
-#
+    - name: '📦 Install ccache'
+      run: |
+        sudo apt-get update
+        sudo apt-get install ccache
+
     - name: '📦 Install Verilator'
       uses: veryl-lang/setup-verilator@v1.0.2
       with:
