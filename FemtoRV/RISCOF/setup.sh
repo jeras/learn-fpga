@@ -4,12 +4,12 @@ source .venv/bin/activate
 pip3 install jsoncomment
 
 # GCC for RISC-V
+# versions with bug (producing C instructions for -march=rv32i)
 #curl -L -O https://github.com/riscv-collab/riscv-gnu-toolchain/releases/latest/download/riscv32-elf-ubuntu-24.04-gcc.tar.xz
 #curl -L -O https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2025.12.18/riscv32-elf-ubuntu-24.04-gcc.tar.xz
-#curl -L -O https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2025.11.27/riscv32-elf-ubuntu-24.04-gcc.tar.xz
-curl -L -O https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2025.11.21/riscv32-elf-ubuntu-24.04-gcc.tar.xz
-#curl -L -O 
-#curl -L -O 
+#curl -L -O https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2025.05.01/riscv32-elf-ubuntu-24.04-gcc-nightly-2025.05.01-nightly.tar.xz
+# last prebuilt working version
+curl -L -O https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2025.01.20/riscv32-elf-ubuntu-24.04-gcc-nightly-2025.01.20-nightly.tar.xz
 rm -rf riscv
 tar -xf riscv32-elf-ubuntu-24.04-gcc.tar.xz
 export PATH=`pwd`/riscv/bin:$PATH

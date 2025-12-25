@@ -129,7 +129,7 @@ class spike(pluginTemplate):
 
             # run reference model
             # signature-granularity specifies how many bytes in HEX are in a line of the signature file
-            cmd = self.ref_exe + f' --isa={self.isa} --log-commits +signature={sig} +signature-granularity=4 {elf} > ref.log 2>&1'
+            cmd = self.ref_exe + f' --isa={self.isa} --log-commits +signature={sig} +signature-granularity=4 {elf} > {log} 2>&1'
             execute.append(cmd)
 
             make.add_target('\n'.join(execute))

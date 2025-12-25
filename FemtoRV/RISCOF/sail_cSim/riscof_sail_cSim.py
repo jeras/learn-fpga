@@ -90,17 +90,6 @@ class sail_cSim(pluginTemplate):
             logger.error(self.make + ": executable not found. Please check environment setup.")
             raise SystemExit(1)
 
-        # ---- NEORV32-specific ----
-        # Override default exception relocation list (traps for MTVAL being set zero)
-        print("<plugin-sail_cSim> yaml-overwrite: overriding default SET_REL_TVAL_MSK macro")
-        neorv32_override  = ' \"-DSET_REL_TVAL_MSK=(('
-        neorv32_override += '(1<<CAUSE_MISALIGNED_LOAD)  | '
-        neorv32_override += '(1<<CAUSE_LOAD_ACCESS)      | '
-        neorv32_override += '(1<<CAUSE_MISALIGNED_STORE) | '
-        neorv32_override += '(1<<CAUSE_STORE_ACCESS)       '
-        neorv32_override += ') & 0xFFFFFFFF)\" '
-        self.compile_cmd += neorv32_override
-
     def runTests(self, testList, cgf_file=None):
         # remove ':' from the end of the name
         name = self.name[:-1]
@@ -142,7 +131,7 @@ class sail_cSim(pluginTemplate):
             execute.append(cmd)
 
             # run reference model
-            cmd = self.ref_exe + f' -i -v --trace-all --signature-granularity=4  --test-signature={signature} {elf} > {log} 2>&1'
+            cmd = self.ref_exe + f' --config ../config.json --trace-reg --trace-mem --signature-granularity=4 --test-signature={sig} {elf} > {log} 2>&1'
             execute.append(cmd)
 
             make.add_target('\n'.join(execute))
