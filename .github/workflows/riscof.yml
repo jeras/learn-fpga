@@ -27,6 +27,10 @@ jobs:
       uses: veryl-lang/setup-verilator@v1.0.2
       with:
         version: latest
+  
+    # somehow veryl-lang/setup-verilator uses mold
+    - name: '📦 Install mold linker'
+      uses: rui314/setup-mold@v1
 
     - name: '📦 Install RISC-V toolchain'
       run: |
