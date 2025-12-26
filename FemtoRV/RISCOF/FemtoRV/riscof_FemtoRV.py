@@ -48,7 +48,7 @@ class FemtoRV(pluginTemplate):
         # Capture HDL simulator choice.
         self.simulator = config['simulator']
         self.dut       = config['dut']
-        self.interrupt = config['interrupt']
+        self.interrupt = (config['interrupt'].lower() == 'true')
 
         # Enable/disable debug functionality
         self.debug = config['debug']
