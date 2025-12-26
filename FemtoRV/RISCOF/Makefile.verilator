@@ -22,6 +22,9 @@ HDL+=${TSV}
 # top level file
 TOP ?= riscof_tb
 
+# include paths
+INC = -I../RTL/PROCESSOR/
+
 ################################################################################
 # Verilator compiler/linker flags
 ################################################################################
@@ -88,11 +91,11 @@ ARG += ${HDL_PLUSARGS}
 all: sim
 
 lint: ${HDL}
-	${VERILATOR} --lint-only ${HDL} --top ${TOP}
+	${VERILATOR} --lint-only ${INC} ${HDL} --top ${TOP}
 
 compile: ${HDL}
 	echo "==== compile ===="
-	${VERILATOR} ${VFLAGS} ${MCR} ${PAR} --top ${TOP} ${HDL}
+	${VERILATOR} ${VFLAGS} ${MCR} ${PAR} --top ${TOP} ${INC} ${HDL}
 
 simulate:
 	echo "==== run ===="
