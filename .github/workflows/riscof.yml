@@ -84,6 +84,26 @@ jobs:
       continue-on-error: true
       run: riscof run --config=config-electron.ini      --suite=riscv-arch-test-3.10.0/riscv-test-suite/ --env=riscv-arch-test-3.10.0/riscv-test-suite/env --no-browser
 
+    - name: '⚙️ Run RISCOF for intermissum'
+      working-directory: FemtoRV/RISCOF
+      continue-on-error: true
+      run: riscof run --config=config-intermissum.ini   --suite=riscv-arch-test-3.10.0/riscv-test-suite/ --env=riscv-arch-test-3.10.0/riscv-test-suite/env --no-browser
+
+    - name: '⚙️ Run RISCOF for gracilis'
+      working-directory: FemtoRV/RISCOF
+      continue-on-error: true
+      run: riscof run --config=config-gracilis.ini      --suite=riscv-arch-test-3.10.0/riscv-test-suite/ --env=riscv-arch-test-3.10.0/riscv-test-suite/env --no-browser
+
+    - name: '⚙️ Run RISCOF for individua'
+      working-directory: FemtoRV/RISCOF
+      continue-on-error: true
+      run: riscof run --config=config-individua.ini     --suite=riscv-arch-test-3.10.0/riscv-test-suite/ --env=riscv-arch-test-3.10.0/riscv-test-suite/env --no-browser
+
+    - name: '⚙️ Run RISCOF for petitbateau'
+      working-directory: FemtoRV/RISCOF
+      continue-on-error: true
+      run: riscof run --config=config-petitbateau.ini   --suite=riscv-arch-test-3.10.0/riscv-test-suite/ --env=riscv-arch-test-3.10.0/riscv-test-suite/env --no-browser
+
     - name: '📤 Archive test report'
       uses: actions/upload-artifact@v5
       with:

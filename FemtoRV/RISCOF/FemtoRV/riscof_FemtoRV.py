@@ -48,6 +48,7 @@ class FemtoRV(pluginTemplate):
         # Capture HDL simulator choice.
         self.simulator = config['simulator']
         self.dut       = config['dut']
+        self.interrupt = config['interrupt']
 
         # Enable/disable debug functionality
         self.debug = config['debug']
@@ -89,20 +90,26 @@ class FemtoRV(pluginTemplate):
         self.symbols_exe = f'riscv{self.xlen}-unknown-elf-nm'
 
         # Simulation define macros.
-        simulate_defines_dict = {}
+        hdl_defines_dict = {}
         if self.debug:
-            simulate_defines_dict.update({'TRACE_SPIKE': None})
+            hdl_defines_dict.update({'TRACE_SPIKE': None})
+        if self.interrupt:
+            hdl_defines_dict.update({'INTERRUPT': 1})
+        hdl_parameters_dict = {}
 
         # Convert define macro dictionary into CLI
         # TODO: properly handle define macros without value
         if   self.simulator == 'questa':
-            simulate_defines = ' '.join([f'-defineall {key}={val}' for key, val in simulate_defines_dict.items()])
+            hdl_defines    = ' '.join([f'-defineall {key}={val}' for key, val in hdl_defines_dict.items()])
+            # TODO: hdl_parameters
         elif self.simulator == 'verilator':
-            simulate_defines = ' '.join([f'-D{key}={val}'          for key, val in simulate_defines_dict.items()])
+            hdl_defines    = ' '.join([f'-D{key}={val}' for key, val in hdl_defines_dict.items()])
+            hdl_parameters = ' '.join([f'-G{key}={val}' for key, val in hdl_parameters_dict.items()])
         elif self.simulator == 'vivado':
-            simulate_defines = ' '.join([f'-d {key}={val}'         for key, val in simulate_defines_dict.items()])
+            hdl_defines = ' '.join([f'-d {key}={val}' for key, val in hdl_defines_dict.items()])
+            # TODO: hdl_parameters
 
-        variables = f'DUT={self.dut} HDL_DEFINES="{simulate_defines}"'
+        variables = f'DUT={self.dut} HDL_DEFINES="{hdl_defines}" HDL_PARAMETERS="{hdl_parameters}"'
 
         # Makefile configuration
         variables += ' TRACE=1'
@@ -195,7 +202,7 @@ class FemtoRV(pluginTemplate):
             symbols_cmd = self.symbols_exe + f' {elf} > {sym}'
 
             # Construct Verilog plusargs dictionary containing file paths.
-            simulate_plusargs_dict = {
+            hdl_plusargs_dict = {
                 'TEST_DIR': test_dir+'/'
             }
 
@@ -203,16 +210,16 @@ class FemtoRV(pluginTemplate):
             symbols_list = ['begin_signature', 'end_signature', 'tohost', 'fromhost']
             # provide ELF symbols as plusargs
             for symbol in symbols_list:
-                simulate_plusargs_dict.update({symbol: f'`grep -w {symbol} {sym} | cut -c 1-8`'})
+                hdl_plusargs_dict.update({symbol: f'`grep -w {symbol} {sym} | cut -c 1-8`'})
 
             # Other DUT testbench specific Verilog plusargs can be added here.
-            simulate_plusargs_dict.update({})
+            hdl_plusargs_dict.update({})
 
             # Convert Verilog plusargs dictionary into CLI
             if   self.simulator in ('questa', 'verilator'):
-                simulate_plusargs = ' '.join([f'+{key}={val}' for key, val in simulate_plusargs_dict.items()])
+                hdl_plusargs = ' '.join([f'+{key}={val}' for key, val in hdl_plusargs_dict.items()])
             elif self.simulator == 'vivado':
-                simulate_plusargs = ' '.join([f'-testplusarg {key}={val}' for key, val in simulate_plusargs_dict.items()])
+                hdl_plusargs = ' '.join([f'-testplusarg {key}={val}' for key, val in hdl_plusargs_dict.items()])
 
 	        # If the user wants to disable running the tests and only compile the tests,
             # then the "else" clause is executed below assigning the sim command to simple no action echo statement.
@@ -221,7 +228,7 @@ class FemtoRV(pluginTemplate):
                 # test-bench produced by a simulator (like verilator, vcs, incisive, etc).
                 # In case of an iss or emulator, this variable could point to where the iss binary is located.
                 # If PATH variable is missing in the config.ini we can hardcode the alternate here.
-                variables = f' HDL_PLUSARGS="{simulate_plusargs}"'
+                variables = f' HDL_PLUSARGS="{hdl_plusargs}"'
                 if   self.simulator == 'questa':
                     simulate_cmd = f'{variables} make -C {os.path.join(self.work_dir, "../")} -f Makefile.questa simulate'
                 elif self.simulator == 'verilator':

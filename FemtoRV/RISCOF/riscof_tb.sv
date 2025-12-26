@@ -45,6 +45,9 @@ module riscof_tb #(
     logic                     mem_rbusy;  // asserted if memory is busy reading value
     logic                     mem_wbusy;  // asserted if memory is busy writing value
 
+    // interrupt request
+    logic irq = 1'b0;
+
     // memory array
     logic [8-1:0] memory_array [0:MEM_SIZE-1];
 
@@ -53,18 +56,22 @@ module riscof_tb #(
     ////////////////////////////////////////////////////////////////////////////////
 
     FemtoRV32 #(
-      .RESET_ADDR (32'h8000_0000),
-      .ADDR_WIDTH (XLEN)
+        .RESET_ADDR (32'h8000_0000),
+        .ADDR_WIDTH (XLEN)
     ) DUT (
-      .clk       ( clk),
-      .reset     (~rst),       // set to 0 to reset the processor
-      .mem_addr  (mem_addr ),  // address bus
-      .mem_wdata (mem_wdata),  // data to be written
-      .mem_wmask (mem_wmask),  // write mask for the 4 bytes of each word
-      .mem_rdata (mem_rdata),  // input lines for both data and instr
-      .mem_rstrb (mem_rstrb),  // active to initiate memory read (used by IO)
-      .mem_rbusy (mem_rbusy),  // asserted if memory is busy reading value
-      .mem_wbusy (mem_wbusy)   // asserted if memory is busy writing value
+        .clk       ( clk),
+        .reset     (~rst),       // set to 0 to reset the processor
+        .mem_addr  (mem_addr ),  // address bus
+        .mem_wdata (mem_wdata),  // data to be written
+        .mem_wmask (mem_wmask),  // write mask for the 4 bytes of each word
+        .mem_rdata (mem_rdata),  // input lines for both data and instr
+        .mem_rstrb (mem_rstrb),  // active to initiate memory read (used by IO)
+        .mem_rbusy (mem_rbusy),  // asserted if memory is busy reading value
+        .mem_wbusy (mem_wbusy)   // asserted if memory is busy writing value
+`ifdef INTERRUPT
+        ,
+        .interrupt_request (irq)
+`endif
     );
 
     ////////////////////////////////////////////////////////////////////////////////
