@@ -95,6 +95,7 @@ lint: ${HDL}
 
 compile: ${HDL}
 	echo "==== compile ===="
+	rm -rf obj_dir/
 	${VERILATOR} ${VFLAGS} ${MCR} ${PAR} --top ${TOP} ${INC} ${HDL}
 
 simulate:
