@@ -45,11 +45,14 @@ module riscof_tb #(
     logic                     mem_rbusy;  // asserted if memory is busy reading value
     logic                     mem_wbusy;  // asserted if memory is busy writing value
 
-    // interrupt request
-    logic irq = 1'b0;
-
     // memory array
     logic [8-1:0] memory_array [0:MEM_SIZE-1];
+
+    // address
+    logic [XLEN-1:0] addr;
+
+    // interrupt request
+    logic irq = 1'b0;
 
     ////////////////////////////////////////////////////////////////////////////////
     // RTL DUT instance
@@ -78,19 +81,23 @@ module riscof_tb #(
     // memory
     ////////////////////////////////////////////////////////////////////////////////
 
+    // handle LSB address
+//  assign addr = {mem_addr[XLEN-1:2], mem_rstrb | |mem_wdata ? 2'b00 : mem_addr[1:0]};
+    assign addr = {mem_addr[XLEN-1:2], 2'b00};
+
     // memory array
     always_ff @(posedge clk)
     begin
         // write access
         for (int unsigned i=0; i<XLEN/8; i++) begin
-            if (mem_wmask[i]) memory_array[mem_addr+i] <= mem_wdata[i];
+            if (mem_wmask[i]) memory_array[addr+i] <= mem_wdata[i];
         end
         // read access
         // TODO: always reading, no power saving
 //        if (mem_rstrb) begin
         if (1'b1) begin
             for (int unsigned i=0; i<XLEN/8; i++) begin
-                mem_rdata[i] <= memory_array[mem_addr+i];
+                mem_rdata[i] <= memory_array[addr+i];
             end
         end
     end
